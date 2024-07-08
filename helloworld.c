@@ -13,15 +13,34 @@ typedef struct _polybang {
     t_int mod_A, mod_B;
 } t_polybang;
 
-// Create function that acts as an initializer for class
-void *polybang_new(void) {
+// Helper function to set the values of mod_A and mod_B
+void polybang_setMods(t_polybang *x, t_floatarg f1, t_floatarg f2) {
+    x->mod_A = (f1 <= 0) ? 0 : f1;
+    x->mod_B = (f2 <= 0) ? 0 : f2;
+}
+
+// Helper function to reset count
+void polybang_resetCount(t_polybang *x) {
+    x->init_count = 0;
+    x->current_count = x->init_count;
+}
+
+// Create function that acts as an initializer for class, returns generic pointer
+// argument type is t_floatarg because in class_new we defined object arguments as A_DEFFLOAT
+void *polybang_new(t_floatarg f1, t_floatarg f2) {
     //pd_new returns generic pointer so need to typecast as t_polybang *
+    // pd_new reserves memory for the data space and initializes internal variables, returning a pointer
     t_polybang *x = (t_polybang *)pd_new(polybang_class);
-    return (void *)x;
+
+    polybang_resetCount(x);
+
+    return (void *)x; // if the initializer returned NULL, PD will think the object was not created so return pointer
 }
 
 // Need function to set-up the class and call the initializer
-//! MUST BE CALLED externalname_setup!
+//! MUST BE CALLED externalname_setup! PD will call this function automatically
+//! when loading a new library to load the external itself
+//! 
 
 /*
  * below is the method header for class new
@@ -53,7 +72,7 @@ void polybang_setup(void) {
                                0,
                                sizeof(t_polybang),
                                CLASS_DEFAULT,
-                               A_DEFFLOAT,
+                               A_DEFFLOAT,  
                                A_DEFFLOAT,
                                0);
 }
